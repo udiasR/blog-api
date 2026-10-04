@@ -1,16 +1,16 @@
-"""
-ASGI config for blog project.
-
-It exposes the ASGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/5.2/howto/deployment/asgi/
-"""
-
 import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'blog.settings')
+from settings.conf import ENV_ID
+
+
+assert ENV_ID, "Environmental value is not set"
+
+
+os.environ.setdefault(
+    'DJANGO_SETTINGS_MODULE', 
+    'fsettings.env{ENV_ID}'
+)
 
 application = get_asgi_application()
