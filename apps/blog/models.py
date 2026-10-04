@@ -1,5 +1,6 @@
 from decimal import Decimal
 from django.db import models
+from django.conf import settings
 
 from django.contrib.auth.models import User
 from django.db.models import (
@@ -48,7 +49,7 @@ class Post(AbstractBaseModel):
 
 
     author = ForeignKey(
-        to=User,
+        to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
     title = CharField(
@@ -81,7 +82,7 @@ class Comment(AbstractBaseModel):
     )
     slug = SlugField(unique=True)
     author = ForeignKey(
-        to=User,
+        to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
     body = TextField()

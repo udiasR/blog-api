@@ -23,8 +23,13 @@ DJANGO_AND_THIRD_PARTY_APPS = [
 ]
 PROJECT_APPS = [
     "apps.blog.apps.BlogConfig",
-    "apps.auths.apps.Auths.BlogConfig",
+    "apps.auths.apps.AuthsConfig",
+    "apps.users.apps.UsersConfig", 
+    "apps.abstracts.apps.AbstractsConfig",
 ]
+
+AUTH_USER_MODEL = "users.CustomUser" 
+
 INSTALLED_APPS = DJANGO_AND_THIRD_PARTY_APPS + PROJECT_APPS
 
 

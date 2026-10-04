@@ -1,39 +1,69 @@
-from decimal import Decimal
+from typing import Any
 
-from django.db.models import (
-    CharField,
-    BooleanField,
-    ForeignKey,
-    DecimalField,
-    UniqueConstraint,
-    TextField,
-    ManyToManyField,
-    EmailField,
-    PROTECT,
-)
+from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import PermissionsMixin
+from django.db.models import BooleanField, CharField, EmailField
 
 from apps.abstracts.models import AbstractBaseModel
 
-# Create your models here.
-class User(AbstractBaseModel):
-    """User database table."""
 
-    NAME_MAX_LEN = 50
+class CustomUserManager(BaseUserManager):
+    """Manager: knows how to create users correctly."""
 
-    email = EmailField()
-    first_name = CharField(
-        max_length=NAME_MAX_LEN,
-    )
-    last_name = CharField(
-        max_length=NAME_MAX_LEN,
-    )
-    is_active = BooleanField(
-        default=True,
-    )
-    is_staff = BooleanField(
-        default=False,
-    )
+    def create_user(
+        self,
+        email: str,
+        full_name: str,
+        password: str | None = None,
+        **extra_fields: Any,
+    ) -> "CustomUser":
+        if not email:
+            raise ValueError("Email is required")
+
+        email = self.normalize_email(email)   
+        user = self.model(email=email, full_name=full_name, **extra_fields)
+        user.set_password(password)         
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(
+        self,
+        email: str,
+        full_name: str,
+        password: str | None = None,
+        **extra_fields: Any,
+    ) -> "CustomUser":
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        return self.create_user(email, full_name, password, **extra_fields)
 
 
+class CustomUser(AbstractBaseUser, PermissionsMixin, AbstractBaseModel):
+    """User who logs in with email."""
+
+    EMAIL_MAX_LEN = 254
+    FULL_NAME_MAX_LEN = 150
+
+    email = EmailField(
+        max_length=EMAIL_MAX_LEN,
+        unique=True,               
+    )
+    full_name = CharField(
+        max_length=FULL_NAME_MAX_LEN,
+    )
+    is_active = BooleanField(default=True)   
+    is_staff = BooleanField(default=False)   
+
+    USERNAME_FIELD = "email"          
+    REQUIRED_FIELDS = ["full_name"]   
+
+    objects = CustomUserManager()
+
+    class Meta:
+        verbose_name = "user"
+        verbose_name_plural = "users"
+
+    def __str__(self) -> str:
+        return self.email
 
 
